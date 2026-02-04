@@ -100,13 +100,6 @@
 | **Interaction Patterns** | Паттерны взаимодействия: клики, формы, обратная связь, загрузки, ошибки. | [Interaction Patterns — CryptoRebate](docs/design/interaction-patterns.md) |
 | **Responsive Guidelines** | Адаптивность: брейкпоинты, поведение компонентов, мобильная версия. | [Responsive Guidelines — CryptoRebate](docs/design/responsive-guidelines.md) |
 
-### 3.4 Инструменты (Figma / промпты)
-
-| Документ | Описание | Ссылка |
-|----------|----------|--------|
-| **Figma Make Prompts (полный концепт)** | Промпты для генерации полного визуального концепта в Figma Make. | [Figma Make Prompts — Full Concept](docs/figma-make-prompts.md) |
-| **Figma Make Prompts (прототип)** | Промпты для генерации концепт-прототипа CryptoRebate в Figma Make. | [Figma Make Prompts — Concept Prototype](docs/design/figma-make-prompts.md) |
-
 ---
 
 ## 4. Контекст проекта
