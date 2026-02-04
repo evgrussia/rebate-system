@@ -1,0 +1,72 @@
+# Checkpoint #0 — Intake Phase
+# Создан: Orchestrator Agent | 2026-02-04
+
+checkpoint:
+  id: "CP-000-intake-2026-02-04"
+  created_at: "2026-02-04"
+  created_by: "Orchestrator Agent"
+
+  phase: "intake"
+  status: "completed"
+
+  summary: |
+    Проект CryptoRebate (Rebate System) инициализирован.
+    Это партнёрский rebate-сервис, агрегирующий реферальные программы
+    криптовалютных бирж. Сервис регистрируется как партнёр бирж,
+    привлекает трейдеров по реферальным ссылкам, получает процент от
+    комиссий и выплачивает часть трейдерам (cashback/rebate).
+    MVP: 11 бирж (MEXC, Bitget, BingX, Weex, Bybit, Binance, Bitmart,
+    OKX, KuCoin, HTX, BloFin).
+    Каналы привлечения: сайт/ЛК, Telegram-бот, инфлюенсеры.
+    Монетизация: разница между rebate от биржи и выплатой трейдеру.
+
+  participating_agents:
+    - agent: "Orchestrator"
+      contribution: "Анализ идеи, создание Project Brief, инициализация Context Store"
+
+  artifacts:
+    - path: "context/project-brief.yaml"
+      status: "created"
+      summary: "Project Brief с описанием проекта, scope, биржами MVP, решениями"
+
+  decisions:
+    - id: "DEC-001"
+      decision: "11 бирж для MVP"
+      rationale: "Указаны пользователем как приоритетные"
+      stakeholder: "Пользователь"
+    - id: "DEC-002"
+      decision: "Только криптовалютные выводы, без фиата"
+      rationale: "Упрощение MVP, избежание регуляторных сложностей"
+      stakeholder: "Пользователь"
+    - id: "DEC-003"
+      decision: "Без KYC на стороне сервиса"
+      rationale: "Достаточно привязки по реферальной ссылке биржи"
+      stakeholder: "Пользователь"
+    - id: "DEC-004"
+      decision: "Каналы привлечения: сайт, Telegram-бот, инфлюенсеры"
+      rationale: "Множественные каналы для максимального охвата"
+      stakeholder: "Пользователь"
+
+  next_actions:
+    - action: "Создать Vision Document"
+      agent: "Product"
+      priority: 1
+    - action: "Создать PRD для MVP"
+      agent: "Product"
+      priority: 2
+    - action: "Исследовать партнёрские программы 11 бирж (API, условия, проценты)"
+      agent: "Research"
+      priority: 3
+    - action: "Определить метрики и tracking plan"
+      agent: "Analytics"
+      priority: 4
+    - action: "Описать бизнес-процессы и модель"
+      agent: "Business-Analyst"
+      priority: 5
+
+  blockers: []
+
+  metrics:
+    completion_percentage: 100
+    documents_created: 1
+    decisions_made: 4

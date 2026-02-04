@@ -1,0 +1,86 @@
+# Design Phase Summary — CryptoRebate
+# Level 1 summary (~500 tokens)
+
+phase_summary:
+  phase: "Design"
+  status: "completed"
+  duration: "2026-02-04 (single session)"
+
+  key_outcomes:
+    - "User Flows: 10 flows (UF-001—UF-010) покрывают все user stories — регистрация, онбординг, биржи, дашборд, вывод, TG-бот, admin"
+    - "Information Architecture: sitemap 3 уровня для Web ЛК, Admin Panel, Landing, TG Bot; URL-структура; page inventory"
+    - "Wireframes: 13 ASCII wireframes (WF-001—WF-013) для всех ключевых экранов Desktop + Mobile адаптации"
+    - "Interaction Patterns: 30+ паттернов — navigation, data display, forms, feedback, actions, micro-interactions, accessibility"
+    - "Design Foundations: цветовая палитра (brand blue #1E40AF + emerald #059669), Inter + JetBrains Mono, 4px spacing"
+    - "Design Tokens: CSS custom properties + JSON + Tailwind config для всех токенов"
+    - "Component Library: 32 компонента в 6 категориях (Inputs, Display, Data, Navigation, Layout, Composite)"
+    - "Responsive Guidelines: 5 breakpoints, mobile-first, touch targets 44px, layout adaptations per device"
+    - "Voice & Tone: прямой, честный, экспертный, дружелюбный; tone variations per channel"
+    - "Content Guidelines: 5 writing principles, glossary 20+ терминов, i18n (RU/EN)"
+    - "UX Copy Patterns: 100+ готовых текстов — кнопки, формы, ошибки, пустые состояния, уведомления"
+
+  key_decisions:
+    - id: "DEC-012"
+      decision: "Design System: CryptoRebate DS на Tailwind CSS"
+      rationale: "Tailwind быстрая разработка, utility-first, хорошо с React"
+    - id: "DEC-013"
+      decision: "Brand colors: Deep Blue (#1E40AF) + Emerald (#059669)"
+      rationale: "Blue = доверие/финансы, Green = деньги/успех, контраст с крипто-хайпом"
+    - id: "DEC-014"
+      decision: "Font: Inter (UI) + JetBrains Mono (code/addresses)"
+      rationale: "Inter отлично для чисел и дашбордов, JetBrains для крипто-адресов"
+    - id: "DEC-015"
+      decision: "Mobile-first responsive approach"
+      rationale: "Крипто-аудитория = mobile heavy, Telegram users"
+    - id: "DEC-016"
+      decision: "Обращение на 'вы' (маленькая буква)"
+      rationale: "Баланс между дружелюбностью и respect к деньгам пользователя"
+    - id: "DEC-017"
+      decision: "Icon library: Lucide React"
+      rationale: "Лёгкая, tree-shakeable, MIT лицензия"
+
+  artifacts:
+    - path: "docs/design/user-flows.md"
+      type: "User Flows"
+      summary: "10 flows с Mermaid-диаграммами, error paths, edge cases"
+    - path: "docs/design/information-architecture.md"
+      type: "Information Architecture"
+      summary: "Sitemap, navigation, URL structure, page inventory"
+    - path: "docs/design/wireframes.md"
+      type: "Wireframes"
+      summary: "13 ASCII wireframes Desktop + Mobile notes"
+    - path: "docs/design/interaction-patterns.md"
+      type: "Interaction Patterns"
+      summary: "Navigation, data, forms, feedback, actions, a11y"
+    - path: "docs/design/design-foundations.md"
+      type: "Design Foundations"
+      summary: "Colors, typography, spacing, grid, shadows, motion"
+    - path: "docs/design/design-tokens.md"
+      type: "Design Tokens"
+      summary: "CSS vars + JSON + Tailwind config"
+    - path: "docs/design/component-library.md"
+      type: "Component Library"
+      summary: "32 компонента, variants, states, props, accessibility"
+    - path: "docs/design/responsive-guidelines.md"
+      type: "Responsive Guidelines"
+      summary: "5 breakpoints, layout adaptations, touch targets"
+    - path: "docs/design/voice-and-tone.md"
+      type: "Voice & Tone"
+      summary: "Brand personality, tone variations, channel guidelines"
+    - path: "docs/design/content-guidelines.md"
+      type: "Content Guidelines"
+      summary: "Writing principles, glossary, style rules, i18n"
+    - path: "docs/design/ux-copy-patterns.md"
+      type: "UX Copy Patterns"
+      summary: "100+ текстов: CTAs, forms, errors, empty states, notifications"
+
+  dependencies_for_next:
+    - "Architecture: system design на основе components + flows"
+    - "Development: design tokens → Tailwind config, component specs → React components"
+    - "QA: user flows → test cases, interaction patterns → test scenarios"
+
+  blockers: []
+
+metadata:
+  created_by: "Orchestrator Agent"
+  created_at: "2026-02-04"
