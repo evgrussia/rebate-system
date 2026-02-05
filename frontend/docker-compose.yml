@@ -1,0 +1,11 @@
+# CryptoRebate Frontend — для деплоя на VPS
+# На хосте проброс порта: 8089 -> 80 контейнера
+
+services:
+  frontend:
+    build: .
+    image: cryptorebate-frontend:latest
+    container_name: cryptorebate-frontend
+    restart: unless-stopped
+    ports:
+      - "8089:80"
