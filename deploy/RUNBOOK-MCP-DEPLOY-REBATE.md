@@ -12,7 +12,7 @@
 
 ## Предусловия
 
-- Репозиторий rebate-system доступен на сервере (clone или уже есть каталог).
+- Репозиторий rebate-system доступен на сервере (clone или уже есть каталог). **Текущий путь на VPS:** `/opt/rebate-system`.
 - DNS: запись A для `rebate.hyper-development.ru` указывает на IP VPS (213.159.67.199).
 - На VPS установлены: Docker, Docker Compose, nginx, certbot.
 
@@ -23,7 +23,7 @@
 ### 1. Перейти в каталог проекта и обновить код
 
 ```bash
-cd /path/to/rebate-system   # заменить на реальный путь, например /var/www/rebate-system или /opt/rebate-system
+cd /opt/rebate-system
 git pull
 ```
 
@@ -41,7 +41,7 @@ docker ps | grep cryptorebate
 ### 3. Добавить конфиг nginx и включить сайт
 
 ```bash
-sudo cp /path/to/rebate-system/deploy/nginx-rebate.hyper-development.ru.conf /etc/nginx/sites-available/rebate.hyper-development.ru
+sudo cp /opt/rebate-system/deploy/nginx-rebate.hyper-development.ru.conf /etc/nginx/sites-available/rebate.hyper-development.ru
 sudo ln -sf /etc/nginx/sites-available/rebate.hyper-development.ru /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```

@@ -113,37 +113,37 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {stats.map((stat, index) => (
             <Card 
               key={index}
-              className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm hover:shadow-lg transition-all"
+              className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm hover:shadow-lg transition-all"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center`}>
-                  <stat.icon className="w-6 h-6 text-white" />
+              <div className="flex items-start justify-between mb-3 sm:mb-4">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center`}>
+                  <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 {stat.change && (
-                  <div className={`flex items-center gap-1 text-sm font-medium ${
+                  <div className={`flex items-center gap-1 text-xs sm:text-sm font-medium ${
                     stat.isPositive ? 'text-emerald-600' : 'text-red-600'
                   }`}>
-                    {stat.isPositive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+                    {stat.isPositive ? <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" /> : <ArrowDownRight className="w-3 h-3 sm:w-4 sm:h-4" />}
                     {stat.change}
                   </div>
                 )}
               </div>
               <div>
-                <div className="text-sm text-gray-600 mb-1">{stat.label}</div>
+                <div className="text-xs sm:text-sm text-gray-600 mb-1">{stat.label}</div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-gray-900">{stat.value}</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-gray-900">{stat.value}</span>
                   {stat.currency && (
-                    <span className="text-sm font-mono text-gray-500">{stat.currency}</span>
+                    <span className="text-xs sm:text-sm font-mono text-gray-500">{stat.currency}</span>
                   )}
                 </div>
                 {stat.subValue && (
-                  <div className="text-sm text-gray-500 mt-1">{stat.subValue}</div>
+                  <div className="text-xs sm:text-sm text-gray-500 mt-1">{stat.subValue}</div>
                 )}
               </div>
             </Card>
@@ -151,23 +151,24 @@ export default function DashboardPage() {
         </div>
 
         {/* Referral Card */}
-        <Card className="p-6 bg-gradient-to-r from-blue-600 to-emerald-600 border-none text-white">
+        <Card className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-emerald-600 border-none text-white">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <Gift className="w-5 h-5" />
-                <h3 className="font-semibold">Реферальная программа</h3>
+                <Gift className="w-4 h-4 sm:w-5 sm:h-5" />
+                <h3 className="text-sm sm:text-base font-semibold">Реферальная программа</h3>
               </div>
-              <p className="text-white/90 mb-4 max-w-2xl">
+              <p className="text-xs sm:text-sm text-white/90 mb-4 max-w-2xl">
                 Приглашайте друзей и получайте 10% от их кэшбэка навсегда. Ваша реферальная ссылка:
               </p>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 font-mono text-sm">
-                  https://cryptorebate.com/ref/{user?.referralCode}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 sm:py-3 font-mono text-xs sm:text-sm overflow-x-auto">
+                  <span className="whitespace-nowrap">https://cryptorebate.com/ref/{user?.referralCode}</span>
                 </div>
                 <Button
                   onClick={handleCopyReferral}
-                  className="bg-white text-blue-600 hover:bg-white/90"
+                  className="bg-white text-blue-600 hover:bg-white/90 w-full sm:w-auto"
+                  size="sm"
                 >
                   {copiedReferral ? (
                     <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -181,33 +182,33 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Connected Exchanges */}
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Подключенные биржи</h3>
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Подключенные биржи</h3>
               <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50">
-                <Building2 className="w-4 h-4 mr-2" />
-                Добавить
+                <Building2 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Добавить</span>
               </Button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {connectedExchanges.map((exchange, index) => (
                 <div 
                   key={index}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="text-2xl">{exchange.logo}</div>
-                    <div>
-                      <div className="font-medium text-gray-900">{exchange.name}</div>
-                      <div className="text-sm text-emerald-600 font-medium">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div className="text-xl sm:text-2xl flex-shrink-0">{exchange.logo}</div>
+                    <div className="min-w-0">
+                      <div className="font-medium text-sm sm:text-base text-gray-900 truncate">{exchange.name}</div>
+                      <div className="text-xs sm:text-sm text-emerald-600 font-medium">
                         {exchange.rebate} кэшбэк
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono font-semibold text-gray-900">
+                  <div className="text-right flex-shrink-0">
+                    <div className="font-mono font-semibold text-sm sm:text-base text-gray-900">
                       ${exchange.earnings.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </div>
                     <div className="text-xs text-gray-500">заработано</div>
@@ -218,37 +219,37 @@ export default function DashboardPage() {
           </Card>
 
           {/* Recent Activity */}
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Последняя активность</h3>
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Последняя активность</h3>
               <Button variant="ghost" size="sm" className="text-blue-600">
-                Смотреть всё
-                <ExternalLink className="w-4 h-4 ml-2" />
+                <span className="hidden sm:inline">Смотреть всё</span>
+                <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 sm:ml-2" />
               </Button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {recentActivity.map((activity, index) => (
                 <div 
                   key={index}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+                  className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-xl"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                       activity.type === 'rebate' ? 'bg-blue-100' :
                       activity.type === 'withdrawal' ? 'bg-purple-100' :
                       'bg-emerald-100'
                     }`}>
-                      {activity.type === 'rebate' && <TrendingUp className="w-5 h-5 text-blue-600" />}
-                      {activity.type === 'withdrawal' && <DollarSign className="w-5 h-5 text-purple-600" />}
-                      {activity.type === 'referral' && <Gift className="w-5 h-5 text-emerald-600" />}
+                      {activity.type === 'rebate' && <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />}
+                      {activity.type === 'withdrawal' && <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />}
+                      {activity.type === 'referral' && <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />}
                     </div>
-                    <div>
-                      <div className="font-medium text-gray-900 text-sm">{activity.exchange}</div>
+                    <div className="min-w-0">
+                      <div className="font-medium text-gray-900 text-xs sm:text-sm truncate">{activity.exchange}</div>
                       <div className="text-xs text-gray-500">{activity.date}</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className={`font-mono font-semibold ${
+                  <div className="text-right flex-shrink-0">
+                    <div className={`font-mono font-semibold text-sm sm:text-base ${
                       activity.type === 'withdrawal' ? 'text-purple-600' : 'text-emerald-600'
                     }`}>
                       {activity.type === 'withdrawal' ? '-' : '+'}${activity.amount.toFixed(2)}

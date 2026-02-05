@@ -18,7 +18,9 @@ import {
   ExternalLink,
   AlertCircle,
   TrendingUp,
-  Calendar
+  Calendar,
+  Building2,
+  DollarSign
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -131,46 +133,63 @@ export default function ExchangesPage() {
 
   const connectedExchanges = exchanges.filter(ex => ex.isConnected);
   const availableExchanges = exchanges.filter(ex => !ex.isConnected);
+  const totalEarnings = connectedExchanges.reduce((sum, ex) => sum + (ex.earnings || 0), 0);
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <Check className="w-5 h-5 text-blue-600" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div>
-                <div className="text-sm text-gray-600">Подключено</div>
-                <div className="text-2xl font-bold text-gray-900">{connectedExchanges.length}</div>
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm text-gray-600">Подключено бирж</div>
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900">{connectedExchanges.length}</div>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-emerald-600" />
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div>
-                <div className="text-sm text-gray-600">Общий объем</div>
-                <div className="text-2xl font-bold text-gray-900 font-mono">
-                  ${connectedExchanges.reduce((sum, ex) => sum + (ex.volume || 0), 0).toLocaleString()}
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm text-gray-600">Всего заработано</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                    ${totalEarnings.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </div>
                 </div>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-purple-600" />
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div>
-                <div className="text-sm text-gray-600">Доступно</div>
-                <div className="text-2xl font-bold text-gray-900">{availableExchanges.length}</div>
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm text-gray-600">За этот месяц</div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                  ${(totalEarnings * 0.25).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm text-gray-600">Средний ребейт</div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">45%</div>
               </div>
             </div>
           </Card>
@@ -178,54 +197,59 @@ export default function ExchangesPage() {
 
         {/* Connected Exchanges */}
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Подключенные биржи</h2>
-          <div className="grid gap-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Подключенные биржи</h2>
+          <div className="space-y-4">
             {connectedExchanges.map((exchange) => (
-              <Card key={exchange.id} className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="text-4xl">{exchange.logo}</div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{exchange.name}</h3>
-                        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
-                          Активна
-                        </Badge>
-                        <Badge variant="outline" className="border-blue-200 text-blue-700">
+              <Card 
+                key={exchange.id} 
+                className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm hover:shadow-lg transition-all"
+              >
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="text-2xl sm:text-3xl flex-shrink-0">{exchange.logo}</div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-base sm:text-lg text-gray-900">{exchange.name}</h3>
+                          <Check className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 flex-shrink-0" />
+                        </div>
+                        <div className="text-xs sm:text-sm text-emerald-600 font-medium">
                           {exchange.rebateRate} кэшбэк
-                        </Badge>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 gap-4 mt-4">
-                        <div>
-                          <div className="text-sm text-gray-600 mb-1">Заработано</div>
-                          <div className="font-mono font-semibold text-gray-900">
-                            ${exchange.earnings?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-600 mb-1">Объем торгов</div>
-                          <div className="font-mono font-semibold text-gray-900">
-                            ${exchange.volume?.toLocaleString()}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-600 mb-1">Последняя синхронизация</div>
-                          <div className="text-sm text-gray-900">{exchange.lastSync}</div>
                         </div>
                       </div>
                     </div>
                   </div>
+
+                  <div className="border-t border-gray-200 pt-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
+                      <div>
+                        <div className="text-xs sm:text-sm text-gray-600 mb-1">Заработано</div>
+                        <div className="font-mono text-sm sm:text-base font-semibold text-gray-900">
+                          ${exchange.earnings?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs sm:text-sm text-gray-600 mb-1">Объем торгов</div>
+                        <div className="font-mono text-sm sm:text-base font-semibold text-gray-900">
+                          ${exchange.volume?.toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="col-span-2 sm:col-span-1">
+                        <div className="text-xs sm:text-sm text-gray-600 mb-1">Последняя синхронизация</div>
+                        <div className="text-xs sm:text-sm text-gray-900">{exchange.lastSync}</div>
+                      </div>
+                    </div>
+                  </div>
                   
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <ExternalLink className="w-4 h-4 mr-2" />
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                      <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                       Детали
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm"
-                      className="text-red-600 border-red-200 hover:bg-red-50"
+                      className="w-full sm:w-auto text-red-600 border-red-200 hover:bg-red-50"
                       onClick={() => handleDisconnect(exchange.id)}
                     >
                       Отключить
@@ -239,19 +263,19 @@ export default function ExchangesPage() {
 
         {/* Available Exchanges */}
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Доступные биржи</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Доступные биржи</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {availableExchanges.map((exchange) => (
               <Card 
                 key={exchange.id} 
-                className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm hover:shadow-lg transition-all"
+                className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm hover:shadow-lg transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="text-3xl">{exchange.logo}</div>
+                    <div className="text-2xl sm:text-3xl">{exchange.logo}</div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{exchange.name}</h3>
-                      <div className="text-sm text-emerald-600 font-medium mt-1">
+                      <h3 className="font-semibold text-sm sm:text-base text-gray-900">{exchange.name}</h3>
+                      <div className="text-xs sm:text-sm text-emerald-600 font-medium mt-1">
                         До {exchange.rebateRate} кэшбэк
                       </div>
                     </div>
@@ -263,47 +287,48 @@ export default function ExchangesPage() {
                     <Button 
                       className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
                       onClick={() => setSelectedExchange(exchange)}
+                      size="sm"
                     >
-                      <Plus className="w-4 h-4 mr-2" />
+                      <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                       Подключить
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
+                  <DialogContent className="sm:max-w-md mx-4">
                     <DialogHeader>
-                      <DialogTitle>Подключить {exchange.name}</DialogTitle>
-                      <DialogDescription>
+                      <DialogTitle className="text-base sm:text-lg">Подключить {exchange.name}</DialogTitle>
+                      <DialogDescription className="text-xs sm:text-sm">
                         Введите API ключи для подключения биржи. Мы рекомендуем создать read-only ключ.
                       </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-                        <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                        <div className="text-sm text-blue-900">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex gap-2 sm:gap-3">
+                        <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div className="text-xs sm:text-sm text-blue-900">
                           <strong>Важно:</strong> Создайте API ключ только с правами на чтение. Права на торговлю и вывод не требуются.
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="apiKey">API Key</Label>
+                        <Label htmlFor="apiKey" className="text-sm">API Key</Label>
                         <Input
                           id="apiKey"
                           placeholder="Вставьте ваш API ключ"
                           value={apiKey}
                           onChange={(e) => setApiKey(e.target.value)}
-                          className="font-mono text-sm"
+                          className="font-mono text-xs sm:text-sm"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="apiSecret">API Secret</Label>
+                        <Label htmlFor="apiSecret" className="text-sm">API Secret</Label>
                         <Input
                           id="apiSecret"
                           type="password"
                           placeholder="Вставьте ваш API secret"
                           value={apiSecret}
                           onChange={(e) => setApiSecret(e.target.value)}
-                          className="font-mono text-sm"
+                          className="font-mono text-xs sm:text-sm"
                         />
                       </div>
 

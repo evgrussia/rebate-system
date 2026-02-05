@@ -74,9 +74,9 @@ export default function AdminDashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="space-y-6 sm:space-y-8">
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {stats.map((stat, index) => (
             <Card 
               key={index}
@@ -180,7 +180,7 @@ export default function AdminDashboardPage() {
                         ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
                         : 'bg-orange-100 text-orange-700 border-orange-200'
                     }>
-                      {user.status === 'active' ? 'Активен' : 'Ожидание'}
+                      {user.status === 'active' ? 'Активен' : '��жидание'}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200">

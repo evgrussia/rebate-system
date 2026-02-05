@@ -18,7 +18,10 @@ import {
   ArrowRight,
   Copy,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  ArrowDownToLine,
+  DollarSign,
+  ExternalLink
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -124,216 +127,202 @@ export default function WithdrawalsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {/* Balance Cards */}
-        <div className="grid md:grid-cols-3 gap-6">
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                <Wallet className="w-6 h-6 text-white" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
+                <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 mb-1">Доступно для вывода</div>
-              <div className="text-3xl font-bold text-gray-900 font-mono">
-                ${balance.available.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm text-gray-600">Доступно</div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                  ${balance.available.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </div>
               </div>
-              <div className="text-sm text-gray-500 mt-1">USDT</div>
             </div>
           </Card>
 
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-white" />
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 mb-1">В обработке</div>
-              <div className="text-3xl font-bold text-gray-900 font-mono">
-                ${balance.pending.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm text-gray-600">В обработке</div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                  ${balance.pending.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </div>
               </div>
-              <div className="text-sm text-gray-500 mt-1">USDT</div>
             </div>
           </Card>
 
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-white" />
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                <ArrowDownToLine className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 mb-1">Минимальный вывод</div>
-              <div className="text-3xl font-bold text-gray-900 font-mono">
-                ${balance.minWithdrawal}
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm text-gray-600">Минимальный вывод</div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                  ${balance.minWithdrawal}
+                </div>
               </div>
-              <div className="text-sm text-gray-500 mt-1">USDT</div>
             </div>
           </Card>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Withdrawal Form */}
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Создать заявку на вывод</h2>
-            
-            <div className="space-y-5">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-blue-900">
-                  Выплаты обрабатываются в течение 24 часов. Минимальная сумма вывода - ${balance.minWithdrawal}
-                </div>
-              </div>
+          <Card className="p-4 sm:p-6 lg:p-8 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Заявка на вывод</h2>
 
+            <div className="space-y-4 sm:space-y-6">
+              {/* Currency Selection */}
               <div className="space-y-2">
-                <Label htmlFor="currency">Валюта</Label>
+                <Label htmlFor="currency" className="text-sm">Валюта</Label>
                 <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger className="h-12 bg-white/50">
+                  <SelectTrigger id="currency" className="h-10 sm:h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USDT">USDT - Tether</SelectItem>
-                    <SelectItem value="USDC">USDC - USD Coin</SelectItem>
-                    <SelectItem value="BTC">BTC - Bitcoin</SelectItem>
-                    <SelectItem value="ETH">ETH - Ethereum</SelectItem>
+                    <SelectItem value="USDT">USDT</SelectItem>
+                    <SelectItem value="BTC">BTC</SelectItem>
+                    <SelectItem value="ETH">ETH</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Network Selection */}
               <div className="space-y-2">
-                <Label htmlFor="network">Сеть</Label>
+                <Label htmlFor="network" className="text-sm">Сеть</Label>
                 <Select value={network} onValueChange={setNetwork}>
-                  <SelectTrigger className="h-12 bg-white/50">
+                  <SelectTrigger id="network" className="h-10 sm:h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="TRC20">TRC20 (Tron) - Без комиссии</SelectItem>
-                    <SelectItem value="ERC20">ERC20 (Ethereum) - Высокая комиссия</SelectItem>
-                    <SelectItem value="BEP20">BEP20 (BSC) - Низкая комиссия</SelectItem>
+                    <SelectItem value="TRC20">TRC20 (Tron)</SelectItem>
+                    <SelectItem value="ERC20">ERC20 (Ethereum)</SelectItem>
+                    <SelectItem value="BEP20">BEP20 (BSC)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Amount Input */}
               <div className="space-y-2">
-                <Label htmlFor="amount">Сумма</Label>
+                <Label htmlFor="amount" className="text-sm">Сумма</Label>
                 <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                   <Input
                     id="amount"
                     type="number"
                     placeholder="0.00"
-                    className="h-12 bg-white/50 font-mono pr-20"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    min={balance.minWithdrawal}
-                    max={balance.available}
+                    className="pl-9 sm:pl-10 font-mono text-base sm:text-lg h-11 sm:h-12"
                   />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-                    {currency}
-                  </div>
                 </div>
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Доступно: ${balance.available.toFixed(2)}</span>
-                  <button
-                    type="button"
+                <div className="flex items-center justify-between text-xs sm:text-sm">
+                  <span className="text-gray-500">
+                    Минимум: ${balance.minWithdrawal}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-0 text-blue-600 hover:bg-transparent"
                     onClick={() => setAmount(balance.available.toString())}
-                    className="text-blue-600 hover:underline font-medium"
                   >
-                    Макс
-                  </button>
+                    Максимум
+                  </Button>
                 </div>
               </div>
 
+              {/* Address Input */}
               <div className="space-y-2">
-                <Label htmlFor="address">Адрес кошелька</Label>
+                <Label htmlFor="address" className="text-sm">Адрес кошелька</Label>
                 <Input
                   id="address"
-                  placeholder={`Введите ${network} адрес`}
-                  className="h-12 bg-white/50 font-mono"
+                  placeholder="Введите адрес кошелька"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
+                  className="font-mono text-xs sm:text-sm h-10 sm:h-11"
                 />
               </div>
 
+              {/* Info Alert */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex gap-2 sm:gap-3">
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs sm:text-sm text-blue-900">
+                  <strong>Обработка:</strong> Выплаты обрабатываются в течение 24-48 часов. Комиссия сети оплачивается получателем.
+                </div>
+              </div>
+
               <Button 
-                className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
                 onClick={handleWithdraw}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 h-11 sm:h-12"
               >
-                Создать заявку
-                <ArrowRight className="w-4 h-4 ml-2" />
+                Создать заявку на вывод
               </Button>
             </div>
           </Card>
 
           {/* Withdrawal History */}
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">История выводов</h2>
-            
-            <div className="space-y-3">
+          <Card className="p-4 sm:p-6 lg:p-8 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">История выводов</h2>
+              <Button variant="ghost" size="sm" className="text-blue-600">
+                <span className="hidden sm:inline">Смотреть всё</span>
+                <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 sm:ml-2" />
+              </Button>
+            </div>
+
+            <div className="space-y-3 sm:space-y-4">
               {withdrawalHistory.map((withdrawal) => (
                 <div 
                   key={withdrawal.id}
-                  className="p-4 bg-gray-50 rounded-xl border border-gray-100"
+                  className="p-3 sm:p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <div className="font-mono font-semibold text-gray-900 text-lg">
-                        ${withdrawal.amount.toFixed(2)}
+                  <div className="flex items-start justify-between gap-3 mb-2 sm:mb-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="font-mono font-semibold text-sm sm:text-base text-gray-900">
+                          ${withdrawal.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                        {getStatusBadge(withdrawal.status)}
                       </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        {new Date(withdrawal.date).toLocaleDateString('ru-RU', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
-                      </div>
+                      <div className="text-xs sm:text-sm text-gray-500">{withdrawal.date}</div>
                     </div>
-                    {getStatusBadge(withdrawal.status)}
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600">Адрес:</span>
-                      <code className="text-sm font-mono text-gray-900">{withdrawal.address}</code>
+                  <div className="flex items-center justify-between text-xs sm:text-sm">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="font-mono text-gray-600 truncate">{withdrawal.address}</span>
+                      <button
+                        onClick={() => handleCopyAddress(withdrawal.address)}
+                        className="flex-shrink-0 text-gray-400 hover:text-blue-600 transition-colors"
+                      >
+                        {copiedAddress === withdrawal.address ? (
+                          <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-600" />
+                        ) : (
+                          <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
+                        )}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleCopyAddress(withdrawal.address)}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      {copiedAddress === withdrawal.address ? (
-                        <CheckCircle2 className="w-4 h-4" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-
-                  {withdrawal.txHash && (
-                    <div className="mt-2 pt-2 border-t border-gray-200">
-                      <a 
+                    {withdrawal.txHash && (
+                      <a
                         href={`https://tronscan.org/#/transaction/${withdrawal.txHash}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                        className="ml-2 flex-shrink-0 text-blue-600 hover:text-blue-700"
                       >
-                        Посмотреть транзакцию
-                        <ArrowRight className="w-3 h-3" />
+                        <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
                       </a>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
-
-            {withdrawalHistory.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                  <Wallet className="w-8 h-8 text-gray-400" />
-                </div>
-                <p className="text-gray-600">История выводов пуста</p>
-                <p className="text-sm text-gray-500 mt-1">Создайте первую заявку на вывод</p>
-              </div>
-            )}
           </Card>
         </div>
       </div>

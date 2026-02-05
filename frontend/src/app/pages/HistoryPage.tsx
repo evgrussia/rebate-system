@@ -19,6 +19,7 @@ import {
   Filter
 } from 'lucide-react';
 import { useState } from 'react';
+import { Label } from '../components/ui/label';
 
 interface Transaction {
   id: string;
@@ -31,8 +32,9 @@ interface Transaction {
 }
 
 export default function HistoryPage() {
-  const [timeFilter, setTimeFilter] = useState('all');
-  const [exchangeFilter, setExchangeFilter] = useState('all');
+  const [period, setPeriod] = useState('all');
+  const [transactionType, setTransactionType] = useState('all');
+  const [status, setStatus] = useState('all');
 
   const transactions: Transaction[] = [
     {
@@ -187,15 +189,15 @@ export default function HistoryPage() {
   };
 
   const renderTransactionsList = (filteredTransactions: Transaction[]) => (
-    <div className="space-y-3">
+    <div className="space-y-2 sm:space-y-3">
       {filteredTransactions.map((transaction) => (
         <Card 
           key={transaction.id}
-          className="p-5 border-gray-200/50 bg-white/70 backdrop-blur-sm hover:shadow-md transition-all"
+          className="p-3 sm:p-5 border-gray-200/50 bg-white/70 backdrop-blur-sm hover:shadow-md transition-all"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0 w-full sm:w-auto">
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
                 transaction.type === 'rebate' ? 'bg-blue-100' :
                 transaction.type === 'withdrawal' ? 'bg-purple-100' :
                 'bg-emerald-100'
@@ -203,21 +205,21 @@ export default function HistoryPage() {
                 {getTypeIcon(transaction.type)}
               </div>
 
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-gray-900">{transaction.exchange}</h3>
-                  <Badge className={getTypeBadgeColor(transaction.type)}>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <h3 className="font-semibold text-sm sm:text-base text-gray-900">{transaction.exchange}</h3>
+                  <Badge className={`${getTypeBadgeColor(transaction.type)} text-xs`}>
                     {getTypeLabel(transaction.type)}
                   </Badge>
                 </div>
-                <p className="text-sm text-gray-600">{transaction.details}</p>
+                <p className="text-xs sm:text-sm text-gray-600 truncate">{transaction.details}</p>
                 <p className="text-xs text-gray-500 mt-1">{formatDate(transaction.date)}</p>
               </div>
             </div>
 
-            <div className="text-right flex items-center gap-4">
-              <div>
-                <div className={`font-mono font-bold text-lg ${
+            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
+              <div className="text-left sm:text-right">
+                <div className={`font-mono font-bold text-base sm:text-lg ${
                   transaction.type === 'withdrawal' ? 'text-purple-600' : 'text-emerald-600'
                 }`}>
                   {transaction.type === 'withdrawal' ? '-' : '+'}${transaction.amount.toFixed(2)}
@@ -231,12 +233,12 @@ export default function HistoryPage() {
       ))}
 
       {filteredTransactions.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-            <Calendar className="w-8 h-8 text-gray-400" />
+        <div className="text-center py-8 sm:py-12">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
           </div>
-          <p className="text-gray-600">Нет транзакций</p>
-          <p className="text-sm text-gray-500 mt-1">История транзакций появится здесь</p>
+          <p className="text-sm sm:text-base text-gray-600">Нет транзакций</p>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">История транзакций появится здесь</p>
         </div>
       )}
     </div>
@@ -244,10 +246,64 @@ export default function HistoryPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 sm:space-y-8">
+        {/* Filters */}
+        <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+            <div className="flex-1">
+              <Label htmlFor="period" className="sr-only">Период</Label>
+              <Select value={period} onValueChange={setPeriod}>
+                <SelectTrigger id="period" className="h-10 sm:h-11">
+                  <SelectValue placeholder="Выберите период" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все время</SelectItem>
+                  <SelectItem value="today">Сегодня</SelectItem>
+                  <SelectItem value="week">Эта неделя</SelectItem>
+                  <SelectItem value="month">Этот месяц</SelectItem>
+                  <SelectItem value="year">Этот год</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1">
+              <Label htmlFor="type" className="sr-only">Тип</Label>
+              <Select value={transactionType} onValueChange={setTransactionType}>
+                <SelectTrigger id="type" className="h-10 sm:h-11">
+                  <SelectValue placeholder="Тип транзакции" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все типы</SelectItem>
+                  <SelectItem value="rebate">Кэшбэк</SelectItem>
+                  <SelectItem value="referral">Рефералы</SelectItem>
+                  <SelectItem value="withdrawal">Выводы</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1">
+              <Label htmlFor="status" className="sr-only">Статус</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger id="status" className="h-10 sm:h-11">
+                  <SelectValue placeholder="Статус" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все статусы</SelectItem>
+                  <SelectItem value="completed">Завершено</SelectItem>
+                  <SelectItem value="pending">Ожидание</SelectItem>
+                  <SelectItem value="processing">Обработка</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="outline" className="w-full sm:w-auto h-10 sm:h-11">
+              <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+              <span className="hidden sm:inline">Экспорт</span>
+              <span className="sm:hidden">CSV</span>
+            </Button>
+          </div>
+        </Card>
+
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-blue-600" />
@@ -259,7 +315,7 @@ export default function HistoryPage() {
             </div>
           </Card>
 
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
                 <DollarSign className="w-5 h-5 text-purple-600" />
@@ -271,7 +327,7 @@ export default function HistoryPage() {
             </div>
           </Card>
 
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
                 <Gift className="w-5 h-5 text-emerald-600" />
@@ -283,7 +339,7 @@ export default function HistoryPage() {
             </div>
           </Card>
 
-          <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
+          <Card className="p-4 sm:p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
                 <Calendar className="w-5 h-5 text-gray-600" />
@@ -295,46 +351,6 @@ export default function HistoryPage() {
             </div>
           </Card>
         </div>
-
-        {/* Filters and Export */}
-        <Card className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
-              <Filter className="w-5 h-5 text-gray-400" />
-              <Select value={timeFilter} onValueChange={setTimeFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Период" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Все время</SelectItem>
-                  <SelectItem value="today">Сегодня</SelectItem>
-                  <SelectItem value="week">Неделя</SelectItem>
-                  <SelectItem value="month">Месяц</SelectItem>
-                  <SelectItem value="year">Год</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={exchangeFilter} onValueChange={setExchangeFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Биржа" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Все биржи</SelectItem>
-                  <SelectItem value="binance">Binance</SelectItem>
-                  <SelectItem value="bybit">Bybit</SelectItem>
-                  <SelectItem value="mexc">MEXC</SelectItem>
-                  <SelectItem value="okx">OKX</SelectItem>
-                  <SelectItem value="gateio">Gate.io</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50">
-              <Download className="w-4 h-4 mr-2" />
-              Экспорт CSV
-            </Button>
-          </div>
-        </Card>
 
         {/* Transaction Tabs */}
         <Tabs defaultValue="all" className="space-y-6">
