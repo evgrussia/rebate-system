@@ -10,15 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { 
-  TrendingUp, 
-  DollarSign, 
+import {
+  TrendingUp,
+  DollarSign,
   Gift,
   Calendar,
   Download,
-  Filter
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Label } from '../components/ui/label';
 
 interface Transaction {
@@ -34,7 +33,7 @@ interface Transaction {
 export default function HistoryPage() {
   const [period, setPeriod] = useState('all');
   const [transactionType, setTransactionType] = useState('all');
-  const [status, setStatus] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const transactions: Transaction[] = [
     {
@@ -109,17 +108,78 @@ export default function HistoryPage() {
       status: 'completed',
       details: 'AVAX/USDT торговля'
     },
+    {
+      id: '9',
+      type: 'rebate',
+      exchange: 'Bybit',
+      amount: 210.40,
+      date: '2024-01-28T15:10:00',
+      status: 'completed',
+      details: 'XRP/USDT торговля'
+    },
+    {
+      id: '10',
+      type: 'referral',
+      exchange: 'OKX',
+      amount: 32.10,
+      date: '2024-01-25T09:30:00',
+      status: 'completed',
+      details: 'Реферальный доход'
+    },
+    {
+      id: '11',
+      type: 'withdrawal',
+      exchange: 'Bybit',
+      amount: 750.00,
+      date: '2023-12-15T11:00:00',
+      status: 'completed',
+      details: 'ERC20: 0xAb3...F12d'
+    },
+    {
+      id: '12',
+      type: 'rebate',
+      exchange: 'Binance',
+      amount: 98.50,
+      date: '2023-11-20T14:45:00',
+      status: 'completed',
+      details: 'DOGE/USDT торговля'
+    },
   ];
 
-  const stats = {
-    totalRebates: transactions.filter(t => t.type === 'rebate' && t.status === 'completed')
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((t) => {
+      // Period filter
+      if (period !== 'all') {
+        const txDate = new Date(t.date);
+        const now = new Date();
+        const diffMs = now.getTime() - txDate.getTime();
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+        if (period === 'today' && diffDays > 1) return false;
+        if (period === 'week' && diffDays > 7) return false;
+        if (period === 'month' && diffDays > 30) return false;
+        if (period === 'year' && diffDays > 365) return false;
+      }
+
+      // Type filter
+      if (transactionType !== 'all' && t.type !== transactionType) return false;
+
+      // Status filter
+      if (statusFilter !== 'all' && t.status !== statusFilter) return false;
+
+      return true;
+    });
+  }, [period, transactionType, statusFilter]);
+
+  const stats = useMemo(() => ({
+    totalRebates: filteredTransactions.filter(t => t.type === 'rebate' && t.status === 'completed')
       .reduce((sum, t) => sum + t.amount, 0),
-    totalWithdrawals: transactions.filter(t => t.type === 'withdrawal' && t.status === 'completed')
+    totalWithdrawals: filteredTransactions.filter(t => t.type === 'withdrawal' && t.status === 'completed')
       .reduce((sum, t) => sum + t.amount, 0),
-    totalReferrals: transactions.filter(t => t.type === 'referral' && t.status === 'completed')
+    totalReferrals: filteredTransactions.filter(t => t.type === 'referral' && t.status === 'completed')
       .reduce((sum, t) => sum + t.amount, 0),
-    transactionCount: transactions.length
-  };
+    transactionCount: filteredTransactions.length
+  }), [filteredTransactions]);
 
   const getTypeIcon = (type: Transaction['type']) => {
     switch (type) {
@@ -188,10 +248,10 @@ export default function HistoryPage() {
     }
   };
 
-  const renderTransactionsList = (filteredTransactions: Transaction[]) => (
+  const renderTransactionsList = (txList: Transaction[]) => (
     <div className="space-y-2 sm:space-y-3">
-      {filteredTransactions.map((transaction) => (
-        <Card 
+      {txList.map((transaction) => (
+        <Card
           key={transaction.id}
           className="p-3 sm:p-5 border-gray-200/50 bg-white/70 backdrop-blur-sm hover:shadow-md transition-all"
         >
@@ -232,13 +292,13 @@ export default function HistoryPage() {
         </Card>
       ))}
 
-      {filteredTransactions.length === 0 && (
+      {txList.length === 0 && (
         <div className="text-center py-8 sm:py-12">
           <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3 sm:mb-4">
             <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
           </div>
           <p className="text-sm sm:text-base text-gray-600">Нет транзакций</p>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">История транзакций появится здесь</p>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">Попробуйте изменить параметры фильтрации</p>
         </div>
       )}
     </div>
@@ -281,7 +341,7 @@ export default function HistoryPage() {
             </div>
             <div className="flex-1">
               <Label htmlFor="status" className="sr-only">Статус</Label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger id="status" className="h-10 sm:h-11">
                   <SelectValue placeholder="Статус" />
                 </SelectTrigger>
@@ -362,19 +422,19 @@ export default function HistoryPage() {
           </TabsList>
 
           <TabsContent value="all">
-            {renderTransactionsList(transactions)}
+            {renderTransactionsList(filteredTransactions)}
           </TabsContent>
 
           <TabsContent value="rebates">
-            {renderTransactionsList(transactions.filter(t => t.type === 'rebate'))}
+            {renderTransactionsList(filteredTransactions.filter(t => t.type === 'rebate'))}
           </TabsContent>
 
           <TabsContent value="withdrawals">
-            {renderTransactionsList(transactions.filter(t => t.type === 'withdrawal'))}
+            {renderTransactionsList(filteredTransactions.filter(t => t.type === 'withdrawal'))}
           </TabsContent>
 
           <TabsContent value="referrals">
-            {renderTransactionsList(transactions.filter(t => t.type === 'referral'))}
+            {renderTransactionsList(filteredTransactions.filter(t => t.type === 'referral'))}
           </TabsContent>
         </Tabs>
       </div>

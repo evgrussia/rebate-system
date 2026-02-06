@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Button } from '../ui/button';
+import { Menu, X } from 'lucide-react';
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -13,8 +15,15 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const navLinks = [
+    { href: '#how-it-works', label: 'Как работает' },
+    { href: '#exchanges', label: 'Биржи' },
+    { href: '#calculator', label: 'Калькулятор' },
+    { href: '#faq', label: 'FAQ' },
+  ];
+
   return (
-    <header 
+    <header
       className={`sticky top-0 z-50 bg-white transition-all duration-300 ${
         scrolled ? 'shadow-md backdrop-blur-sm' : 'border-b border-[#E5E7EB]'
       }`}
@@ -32,16 +41,21 @@ export function Header() {
             <span className="text-xl font-bold text-[#111827]">CryptoRebate</span>
           </div>
 
-          {/* Navigation */}
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-[#374151] hover:text-[#1E40AF] transition-colors">Как работает</a>
-            <a href="#exchanges" className="text-[#374151] hover:text-[#1E40AF] transition-colors">Биржи</a>
-            <a href="#calculator" className="text-[#374151] hover:text-[#1E40AF] transition-colors">Калькулятор</a>
-            <a href="#faq" className="text-[#374151] hover:text-[#1E40AF] transition-colors">FAQ</a>
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-[#374151] hover:text-[#1E40AF] transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center gap-3">
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-3">
             <Button variant="ghost" className="text-[#374151]" asChild>
               <Link to="/login">
                 Войти
@@ -53,8 +67,50 @@ export function Header() {
               </Link>
             </Button>
           </div>
+
+          {/* Mobile Burger Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5 text-gray-700" />
+            ) : (
+              <Menu className="w-5 h-5 text-gray-700" />
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-gray-200 bg-white">
+          <div className="px-6 py-4 space-y-3">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-2 text-[#374151] hover:text-[#1E40AF] transition-colors font-medium"
+              >
+                {link.label}
+              </a>
+            ))}
+            <div className="pt-3 border-t border-gray-200 flex flex-col gap-2">
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  Войти
+                </Link>
+              </Button>
+              <Button className="w-full bg-[#1E40AF] text-white hover:bg-[#1E40AF]/90" asChild>
+                <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                  Начать
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -6,35 +6,50 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card } from '../components/ui/card';
 import { toast } from 'sonner';
-import { 
-  ArrowLeft, 
-  Mail, 
+import {
+  ArrowLeft,
+  Mail,
   Lock,
+  MessageCircle,
   Sparkles,
   BarChart3,
   Wallet,
-  Gift
+  Gift,
+  Send
 } from 'lucide-react';
+
+type AuthMethod = 'email' | 'telegram';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    telegramId: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      await login(formData.email, formData.password);
+      if (authMethod === 'email') {
+        await login(formData.email, formData.password);
+      } else {
+        // Telegram login — demo mode, use telegramId as email
+        await login(formData.telegramId + '@telegram.local', 'telegram-auth');
+      }
       toast.success('Добро пожаловать!');
       navigate('/dashboard');
     } catch (error) {
-      toast.error('Неверный email или пароль');
+      if (authMethod === 'email') {
+        toast.error('Неверный email или пароль');
+      } else {
+        toast.error('Не удалось войти через Telegram');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +114,7 @@ export default function LoginPage() {
 
               <div className="space-y-4">
                 {features.map((feature, index) => (
-                  <Card 
+                  <Card
                     key={index}
                     className="p-6 border-gray-200/50 bg-white/50 backdrop-blur-sm hover:bg-white/80 hover:shadow-lg transition-all"
                   >
@@ -137,46 +152,103 @@ export default function LoginPage() {
               <Card className="p-8 border-gray-200/50 bg-white/70 backdrop-blur-xl shadow-xl">
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">Вход в систему</h2>
-                  <p className="text-gray-600">Введите ваши данные для входа</p>
+                  <p className="text-gray-600">Выберите способ входа</p>
+                </div>
+
+                {/* Auth Method Toggle */}
+                <div className="flex gap-1 bg-gray-100 rounded-lg p-1 mb-6">
+                  <button
+                    type="button"
+                    onClick={() => setAuthMethod('email')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
+                      authMethod === 'email'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Mail className="w-4 h-4" />
+                    Email
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAuthMethod('telegram')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
+                      authMethod === 'telegram'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Send className="w-4 h-4" />
+                    Telegram
+                  </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="your@email.com"
-                        className="pl-11 h-12 bg-white/50"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
+                  {authMethod === 'email' ? (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder="your@email.com"
+                            className="pl-11 h-12 bg-white/50"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            required
+                          />
+                        </div>
+                      </div>
 
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Пароль</Label>
-                      <a href="#" className="text-sm text-blue-600 hover:underline">
-                        Забыли пароль?
-                      </a>
-                    </div>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="Введите пароль"
-                        className="pl-11 h-12 bg-white/50"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="password">Пароль</Label>
+                          <a href="#" className="text-sm text-blue-600 hover:underline">
+                            Забыли пароль?
+                          </a>
+                        </div>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <Input
+                            id="password"
+                            type="password"
+                            placeholder="Введите пароль"
+                            className="pl-11 h-12 bg-white/50"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            required
+                          />
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="telegramId">Telegram</Label>
+                        <div className="relative">
+                          <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <Input
+                            id="telegramId"
+                            type="text"
+                            placeholder="@username или Telegram ID"
+                            className="pl-11 h-12 bg-white/50"
+                            value={formData.telegramId}
+                            onChange={(e) => setFormData({ ...formData, telegramId: e.target.value })}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
+                        <Send className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-blue-900">
+                          <strong>Как это работает:</strong> Мы отправим код подтверждения в ваш Telegram. Введите @username или числовой ID аккаунта.
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   <Button
                     type="submit"
@@ -188,8 +260,10 @@ export default function LoginPage() {
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                         Вход...
                       </div>
-                    ) : (
+                    ) : authMethod === 'email' ? (
                       'Войти'
+                    ) : (
+                      'Войти через Telegram'
                     )}
                   </Button>
                 </form>

@@ -11,19 +11,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { 
-  Wallet, 
-  TrendingUp, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../components/ui/dialog';
+import {
+  Wallet,
   Clock,
-  ArrowRight,
   Copy,
   CheckCircle2,
   AlertCircle,
   ArrowDownToLine,
   DollarSign,
-  ExternalLink
+  ExternalLink,
+  AlertTriangle
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 
 interface Withdrawal {
@@ -36,12 +42,19 @@ interface Withdrawal {
   txHash?: string;
 }
 
+const networkFees: Record<string, number> = {
+  TRC20: 1,
+  ERC20: 5,
+  BEP20: 0.5,
+};
+
 export default function WithdrawalsPage() {
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('USDT');
   const [network, setNetwork] = useState('TRC20');
   const [address, setAddress] = useState('');
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const balance = {
     available: 12543.50,
@@ -77,16 +90,21 @@ export default function WithdrawalsPage() {
     },
   ];
 
-  const handleCopyAddress = (address: string) => {
-    navigator.clipboard.writeText(address);
-    setCopiedAddress(address);
+  const fee = useMemo(() => networkFees[network] || 0, [network]);
+  const withdrawAmount = useMemo(() => parseFloat(amount) || 0, [amount]);
+  const receiveAmount = useMemo(
+    () => Math.max(0, withdrawAmount - fee),
+    [withdrawAmount, fee]
+  );
+
+  const handleCopyAddress = (addr: string) => {
+    navigator.clipboard.writeText(addr);
+    setCopiedAddress(addr);
     toast.success('Адрес скопирован');
     setTimeout(() => setCopiedAddress(null), 2000);
   };
 
-  const handleWithdraw = () => {
-    const withdrawAmount = parseFloat(amount);
-    
+  const handleWithdrawClick = () => {
     if (!amount || withdrawAmount <= 0) {
       toast.error('Введите корректную сумму');
       return;
@@ -107,6 +125,11 @@ export default function WithdrawalsPage() {
       return;
     }
 
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmWithdraw = () => {
+    setShowConfirmDialog(false);
     toast.success('Заявка на вывод создана!');
     setAmount('');
     setAddress('');
@@ -202,9 +225,9 @@ export default function WithdrawalsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="TRC20">TRC20 (Tron)</SelectItem>
-                    <SelectItem value="ERC20">ERC20 (Ethereum)</SelectItem>
-                    <SelectItem value="BEP20">BEP20 (BSC)</SelectItem>
+                    <SelectItem value="TRC20">TRC20 (Tron) — комиссия $1</SelectItem>
+                    <SelectItem value="ERC20">ERC20 (Ethereum) — комиссия $5</SelectItem>
+                    <SelectItem value="BEP20">BEP20 (BSC) — комиссия $0.50</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -238,6 +261,24 @@ export default function WithdrawalsPage() {
                 </div>
               </div>
 
+              {/* Commission Details */}
+              {withdrawAmount > 0 && (
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Сумма вывода</span>
+                    <span className="font-mono">${withdrawAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Комиссия сети ({network})</span>
+                    <span className="font-mono text-red-600">-${fee.toFixed(2)}</span>
+                  </div>
+                  <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold text-gray-900">
+                    <span>Вы получите</span>
+                    <span className="font-mono">${receiveAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
+
               {/* Address Input */}
               <div className="space-y-2">
                 <Label htmlFor="address" className="text-sm">Адрес кошелька</Label>
@@ -254,12 +295,12 @@ export default function WithdrawalsPage() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex gap-2 sm:gap-3">
                 <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div className="text-xs sm:text-sm text-blue-900">
-                  <strong>Обработка:</strong> Выплаты обрабатываются в течение 24-48 часов. Комиссия сети оплачивается получателем.
+                  <strong>Обработка:</strong> Выплаты обрабатываются в течение 24-48 часов.
                 </div>
               </div>
 
-              <Button 
-                onClick={handleWithdraw}
+              <Button
+                onClick={handleWithdrawClick}
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 h-11 sm:h-12"
               >
                 Создать заявку на вывод
@@ -279,7 +320,7 @@ export default function WithdrawalsPage() {
 
             <div className="space-y-3 sm:space-y-4">
               {withdrawalHistory.map((withdrawal) => (
-                <div 
+                <div
                   key={withdrawal.id}
                   className="p-3 sm:p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                 >
@@ -326,6 +367,63 @@ export default function WithdrawalsPage() {
           </Card>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Подтверждение вывода</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="bg-gray-50 rounded-lg p-4 space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Сумма</span>
+                <span className="font-mono font-semibold">${withdrawAmount.toFixed(2)} {currency}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Сеть</span>
+                <span className="font-medium">{network}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Комиссия</span>
+                <span className="font-mono text-red-600">-${fee.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Адрес</span>
+                <span className="font-mono text-xs truncate max-w-[180px]">{address}</span>
+              </div>
+              <div className="border-t border-gray-200 pt-3 flex justify-between font-semibold text-gray-900">
+                <span>Вы получите</span>
+                <span className="font-mono">${receiveAmount.toFixed(2)} {currency}</span>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-amber-900">
+                Убедитесь, что адрес кошелька указан верно. Операция необратима.
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-3 sm:gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowConfirmDialog(false)}
+              className="flex-1"
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleConfirmWithdraw}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+            >
+              Подтвердить
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

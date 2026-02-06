@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
@@ -7,22 +7,39 @@ import { Label } from '../components/ui/label';
 import { Card } from '../components/ui/card';
 import { Checkbox } from '../components/ui/checkbox';
 import { toast } from 'sonner';
-import { 
-  ArrowLeft, 
-  Mail, 
-  Lock, 
-  User, 
+import {
+  ArrowLeft,
+  Mail,
+  Lock,
+  User,
   MessageCircle,
   Sparkles,
   Shield,
   Zap,
-  TrendingUp
+  TrendingUp,
+  Send
 } from 'lucide-react';
+
+type AuthMethod = 'email' | 'telegram';
+
+function getPasswordStrength(password: string): { score: number; label: string; color: string } {
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  if (score <= 2) return { score, label: 'Слабый', color: 'bg-red-500' };
+  if (score <= 3) return { score, label: 'Средний', color: 'bg-orange-500' };
+  return { score, label: 'Сильный', color: 'bg-emerald-500' };
+}
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -32,10 +49,15 @@ export default function RegisterPage() {
     agreeToTerms: false,
   });
 
+  const passwordStrength = useMemo(
+    () => getPasswordStrength(formData.password),
+    [formData.password]
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
+
+    if (authMethod === 'email' && formData.password !== formData.confirmPassword) {
       toast.error('Пароли не совпадают');
       return;
     }
@@ -47,7 +69,16 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      await register(formData.email, formData.password, formData.name, formData.telegramId);
+      if (authMethod === 'email') {
+        await register(formData.email, formData.password, formData.name, formData.telegramId);
+      } else {
+        await register(
+          formData.telegramId + '@telegram.local',
+          'telegram-auth',
+          formData.name,
+          formData.telegramId
+        );
+      }
       toast.success('Регистрация успешна! Добро пожаловать в CryptoRebate');
       navigate('/dashboard');
     } catch (error) {
@@ -117,7 +148,7 @@ export default function RegisterPage() {
 
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
-                  <Card 
+                  <Card
                     key={index}
                     className="p-6 border-gray-200/50 bg-white/50 backdrop-blur-sm hover:bg-white/80 hover:shadow-lg transition-all"
                   >
@@ -154,8 +185,36 @@ export default function RegisterPage() {
             <div>
               <Card className="p-8 border-gray-200/50 bg-white/70 backdrop-blur-xl shadow-xl">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Создать аккаун��</h2>
-                  <p className="text-gray-600">Заполните форму для регистрации</p>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Создать аккаунт</h2>
+                  <p className="text-gray-600">Выберите способ регистрации</p>
+                </div>
+
+                {/* Auth Method Toggle */}
+                <div className="flex gap-1 bg-gray-100 rounded-lg p-1 mb-6">
+                  <button
+                    type="button"
+                    onClick={() => setAuthMethod('email')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
+                      authMethod === 'email'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Mail className="w-4 h-4" />
+                    Email
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAuthMethod('telegram')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
+                      authMethod === 'telegram'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Send className="w-4 h-4" />
+                    Telegram
+                  </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -175,78 +234,135 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="your@email.com"
-                        className="pl-11 h-12 bg-white/50"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
+                  {authMethod === 'email' ? (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder="your@email.com"
+                            className="pl-11 h-12 bg-white/50"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            required
+                          />
+                        </div>
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="telegramId">
-                      Telegram ID <span className="text-gray-400 text-sm">(опционально)</span>
-                    </Label>
-                    <div className="relative">
-                      <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input
-                        id="telegramId"
-                        type="text"
-                        placeholder="@username или ID"
-                        className="pl-11 h-12 bg-white/50"
-                        value={formData.telegramId}
-                        onChange={(e) => setFormData({ ...formData, telegramId: e.target.value })}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500">Для получения уведомлений о выплатах</p>
-                  </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="telegramId">
+                          Telegram ID <span className="text-gray-400 text-sm">(опционально)</span>
+                        </Label>
+                        <div className="relative">
+                          <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <Input
+                            id="telegramId"
+                            type="text"
+                            placeholder="@username или ID"
+                            className="pl-11 h-12 bg-white/50"
+                            value={formData.telegramId}
+                            onChange={(e) => setFormData({ ...formData, telegramId: e.target.value })}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500">Для получения уведомлений о выплатах</p>
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Пароль</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="Минимум 8 символов"
-                        className="pl-11 h-12 bg-white/50"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        required
-                        minLength={8}
-                      />
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Пароль</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <Input
+                            id="password"
+                            type="password"
+                            placeholder="Минимум 8 символов"
+                            className="pl-11 h-12 bg-white/50"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            required
+                            minLength={8}
+                          />
+                        </div>
+                        {/* Password Strength Indicator */}
+                        {formData.password.length > 0 && (
+                          <div className="space-y-1.5">
+                            <div className="flex gap-1">
+                              {[1, 2, 3].map((bar) => (
+                                <div
+                                  key={bar}
+                                  className={`h-1.5 flex-1 rounded-full transition-colors ${
+                                    bar === 1
+                                      ? passwordStrength.color
+                                      : bar === 2 && passwordStrength.score >= 3
+                                        ? passwordStrength.color
+                                        : bar === 3 && passwordStrength.score >= 4
+                                          ? passwordStrength.color
+                                          : 'bg-gray-200'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <p className={`text-xs font-medium ${
+                              passwordStrength.score <= 2 ? 'text-red-600' :
+                              passwordStrength.score <= 3 ? 'text-orange-600' :
+                              'text-emerald-600'
+                            }`}>
+                              {passwordStrength.label}
+                            </p>
+                          </div>
+                        )}
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        placeholder="Повторите пароль"
-                        className="pl-11 h-12 bg-white/50"
-                        value={formData.confirmPassword}
-                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <Input
+                            id="confirmPassword"
+                            type="password"
+                            placeholder="Повторите пароль"
+                            className="pl-11 h-12 bg-white/50"
+                            value={formData.confirmPassword}
+                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                            required
+                          />
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="telegramIdMain">Telegram</Label>
+                        <div className="relative">
+                          <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <Input
+                            id="telegramIdMain"
+                            type="text"
+                            placeholder="@username или Telegram ID"
+                            className="pl-11 h-12 bg-white/50"
+                            value={formData.telegramId}
+                            onChange={(e) => setFormData({ ...formData, telegramId: e.target.value })}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
+                        <Send className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-blue-900">
+                          <strong>Быстрая регистрация:</strong> Мы отправим код подтверждения в ваш Telegram. Пароль не требуется — вход через Telegram.
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   <div className="flex items-start gap-3 pt-2">
                     <Checkbox
                       id="terms"
                       checked={formData.agreeToTerms}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         setFormData({ ...formData, agreeToTerms: checked as boolean })
                       }
                       className="mt-1"
@@ -269,8 +385,10 @@ export default function RegisterPage() {
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                         Регистрация...
                       </div>
-                    ) : (
+                    ) : authMethod === 'email' ? (
                       'Создать аккаунт'
+                    ) : (
+                      'Зарегистрироваться через Telegram'
                     )}
                   </Button>
                 </form>

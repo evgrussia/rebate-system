@@ -2,14 +2,23 @@ import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { Card } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
+import { Checkbox } from '../../components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { 
-  CheckCircle2, 
-  XCircle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../components/ui/dialog';
+import {
+  CheckCircle2,
+  XCircle,
   Clock,
   DollarSign,
   TrendingUp,
-  Calendar
+  Calendar,
+  AlertTriangle
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -96,30 +105,86 @@ export default function AdminPayoutsPage() {
     },
   ]);
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+
+  const pendingPayouts = payouts.filter(p => p.status === 'pending');
+
   const stats = {
-    pending: payouts.filter(p => p.status === 'pending').length,
-    pendingAmount: payouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0),
+    pending: pendingPayouts.length,
+    pendingAmount: pendingPayouts.reduce((sum, p) => sum + p.amount, 0),
     processing: payouts.filter(p => p.status === 'processing').length,
     completed: payouts.filter(p => p.status === 'completed').length,
     completedAmount: payouts.filter(p => p.status === 'completed').reduce((sum, p) => sum + p.amount, 0),
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === pendingPayouts.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(pendingPayouts.map(p => p.id)));
+    }
+  };
+
   const handleApprove = (payoutId: string) => {
-    setPayouts(payouts.map(p => 
-      p.id === payoutId 
+    setPayouts(payouts.map(p =>
+      p.id === payoutId
         ? { ...p, status: 'processing' as const, processedDate: new Date().toISOString() }
         : p
     ));
+    setSelectedIds(prev => { const next = new Set(prev); next.delete(payoutId); return next; });
     toast.success('Выплата одобрена и отправлена в обработку');
   };
 
-  const handleReject = (payoutId: string) => {
-    setPayouts(payouts.map(p => 
-      p.id === payoutId 
-        ? { ...p, status: 'rejected' as const, processedDate: new Date().toISOString() }
+  const handleBatchApprove = () => {
+    if (selectedIds.size === 0) return;
+    setPayouts(payouts.map(p =>
+      selectedIds.has(p.id) && p.status === 'pending'
+        ? { ...p, status: 'processing' as const, processedDate: new Date().toISOString() }
         : p
     ));
-    toast.error('Выплата отклонена');
+    const count = selectedIds.size;
+    setSelectedIds(new Set());
+    toast.success(`${count} выплат одобрено`);
+  };
+
+  const openRejectDialog = (payoutId: string | null) => {
+    setRejectingId(payoutId);
+    setRejectReason('');
+    setShowRejectDialog(true);
+  };
+
+  const handleConfirmReject = () => {
+    const idsToReject = rejectingId ? [rejectingId] : Array.from(selectedIds);
+    setPayouts(payouts.map(p =>
+      idsToReject.includes(p.id) && p.status === 'pending'
+        ? {
+            ...p,
+            status: 'rejected' as const,
+            processedDate: new Date().toISOString(),
+            adminNote: rejectReason || undefined
+          }
+        : p
+    ));
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      idsToReject.forEach(id => next.delete(id));
+      return next;
+    });
+    setShowRejectDialog(false);
+    setRejectingId(null);
+    toast.error(`${idsToReject.length > 1 ? idsToReject.length + ' выплат отклонено' : 'Выплата отклонена'}`);
   };
 
   const getStatusBadge = (status: Payout['status']) => {
@@ -147,13 +212,22 @@ export default function AdminPayoutsPage() {
     });
   };
 
-  const renderPayoutCard = (payout: Payout) => (
-    <Card 
+  const renderPayoutCard = (payout: Payout, showCheckbox = false) => (
+    <Card
       key={payout.id}
-      className="p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm"
+      className={`p-6 border-gray-200/50 bg-white/70 backdrop-blur-sm ${
+        selectedIds.has(payout.id) ? 'ring-2 ring-blue-400 bg-blue-50/30' : ''
+      }`}
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-4 flex-1">
+          {showCheckbox && (
+            <Checkbox
+              checked={selectedIds.has(payout.id)}
+              onCheckedChange={() => toggleSelect(payout.id)}
+              className="mt-3"
+            />
+          )}
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center text-white font-semibold">
             {payout.userName.charAt(0)}
           </div>
@@ -166,7 +240,7 @@ export default function AdminPayoutsPage() {
             <p className="text-xs text-gray-500">ID: {payout.userId}</p>
           </div>
         </div>
-        
+
         <div className="text-right">
           <div className="font-mono font-bold text-2xl text-gray-900">
             ${payout.amount.toFixed(2)}
@@ -201,7 +275,7 @@ export default function AdminPayoutsPage() {
       {payout.adminNote && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm text-red-900">
-            <strong>Примечание:</strong> {payout.adminNote}
+            <strong>Причина отклонения:</strong> {payout.adminNote}
           </p>
         </div>
       )}
@@ -218,7 +292,7 @@ export default function AdminPayoutsPage() {
           <Button
             variant="outline"
             className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
-            onClick={() => handleReject(payout.id)}
+            onClick={() => openRejectDialog(payout.id)}
           >
             <XCircle className="w-4 h-4 mr-2" />
             Отклонить
@@ -298,9 +372,47 @@ export default function AdminPayoutsPage() {
           </TabsList>
 
           <TabsContent value="pending">
+            {/* Batch Actions Bar */}
+            {pendingPayouts.length > 0 && (
+              <Card className="p-4 border-gray-200/50 bg-white/70 backdrop-blur-sm flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    checked={selectedIds.size === pendingPayouts.length && pendingPayouts.length > 0}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                  <span className="text-sm text-gray-600">
+                    {selectedIds.size > 0
+                      ? `Выбрано: ${selectedIds.size} из ${pendingPayouts.length}`
+                      : 'Выбрать все'}
+                  </span>
+                </div>
+                {selectedIds.size > 0 && (
+                  <div className="flex gap-3">
+                    <Button
+                      size="sm"
+                      className="bg-emerald-600 hover:bg-emerald-700"
+                      onClick={handleBatchApprove}
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Одобрить ({selectedIds.size})
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-red-200 text-red-600 hover:bg-red-50"
+                      onClick={() => openRejectDialog(null)}
+                    >
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Отклонить ({selectedIds.size})
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            )}
+
             <div className="grid gap-4">
-              {payouts.filter(p => p.status === 'pending').map(renderPayoutCard)}
-              {payouts.filter(p => p.status === 'pending').length === 0 && (
+              {pendingPayouts.map(p => renderPayoutCard(p, true))}
+              {pendingPayouts.length === 0 && (
                 <Card className="p-12 text-center border-gray-200/50 bg-white/70">
                   <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600">Нет ожидающих выплат</p>
@@ -311,7 +423,7 @@ export default function AdminPayoutsPage() {
 
           <TabsContent value="processing">
             <div className="grid gap-4">
-              {payouts.filter(p => p.status === 'processing').map(renderPayoutCard)}
+              {payouts.filter(p => p.status === 'processing').map(p => renderPayoutCard(p))}
               {payouts.filter(p => p.status === 'processing').length === 0 && (
                 <Card className="p-12 text-center border-gray-200/50 bg-white/70">
                   <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -323,7 +435,7 @@ export default function AdminPayoutsPage() {
 
           <TabsContent value="completed">
             <div className="grid gap-4">
-              {payouts.filter(p => p.status === 'completed').map(renderPayoutCard)}
+              {payouts.filter(p => p.status === 'completed').map(p => renderPayoutCard(p))}
               {payouts.filter(p => p.status === 'completed').length === 0 && (
                 <Card className="p-12 text-center border-gray-200/50 bg-white/70">
                   <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -335,7 +447,7 @@ export default function AdminPayoutsPage() {
 
           <TabsContent value="rejected">
             <div className="grid gap-4">
-              {payouts.filter(p => p.status === 'rejected').map(renderPayoutCard)}
+              {payouts.filter(p => p.status === 'rejected').map(p => renderPayoutCard(p))}
               {payouts.filter(p => p.status === 'rejected').length === 0 && (
                 <Card className="p-12 text-center border-gray-200/50 bg-white/70">
                   <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -346,6 +458,55 @@ export default function AdminPayoutsPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Rejection Reason Dialog */}
+      <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Причина отклонения</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-amber-900">
+                {rejectingId
+                  ? 'Вы собираетесь отклонить 1 выплату.'
+                  : `Вы собираетесь отклонить ${selectedIds.size} выплат.`
+                }
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Причина отклонения <span className="text-gray-400">(опционально)</span>
+              </label>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Укажите причину отклонения..."
+                className="w-full h-24 px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-3 sm:gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowRejectDialog(false)}
+              className="flex-1"
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleConfirmReject}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+            >
+              Отклонить
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

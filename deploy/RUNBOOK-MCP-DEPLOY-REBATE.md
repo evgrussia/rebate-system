@@ -29,11 +29,18 @@ git pull
 
 ### 2. Собрать и запустить контейнер frontend
 
+Запуск — из корня репо с явным путём к compose и именем проекта (иначе может подняться другой проект из текущей директории):
+
 ```bash
-cd frontend
-docker compose build --no-cache
-docker compose up -d
+cd /opt/rebate-system
+docker compose -f frontend/docker-compose.yml --project-name rebate build --no-cache
+docker compose -f frontend/docker-compose.yml --project-name rebate up -d
 docker ps | grep cryptorebate
+```
+
+Если контейнер только перезапускается (образ уже собран):
+```bash
+cd /opt/rebate-system && docker compose -f frontend/docker-compose.yml --project-name rebate up -d
 ```
 
 Проверка: `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8089/` — ожидается 200.
@@ -62,8 +69,24 @@ sudo certbot --nginx -d rebate.hyper-development.ru
 
 ## Откат
 
-- Остановить контейнер: `cd frontend && docker compose down`
+- Остановить контейнер: `cd /opt/rebate-system && docker compose -f frontend/docker-compose.yml --project-name rebate down`
 - Отключить сайт: `sudo rm /etc/nginx/sites-enabled/rebate.hyper-development.ru && sudo systemctl reload nginx`
+
+## Устранение 502 (Bad Gateway)
+
+Если сайт отдаёт 502, обычно контейнер не запущен. Проверить и запустить:
+
+```bash
+docker ps -a | grep cryptorebate
+curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8089/
+```
+
+Если контейнер Exited или порт не отвечает — перезапуск:
+```bash
+docker rm -f cryptorebate-frontend 2>/dev/null
+cd /opt/rebate-system && docker compose -f frontend/docker-compose.yml --project-name rebate up -d
+curl -s http://127.0.0.1:8089/health   # ожидается "ok"
+```
 
 ## Артефакты в репо
 

@@ -11,8 +11,10 @@ import LoginPage from './pages/LoginPage';
 // Trader Pages
 import DashboardPage from './pages/DashboardPage';
 import ExchangesPage from './pages/ExchangesPage';
+import ExchangeDetailPage from './pages/ExchangeDetailPage';
 import WithdrawalsPage from './pages/WithdrawalsPage';
 import HistoryPage from './pages/HistoryPage';
+import SettingsPage from './pages/SettingsPage';
 
 // Admin Pages
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
@@ -39,13 +41,21 @@ export default function App() {
               </ProtectedRoute>
             } 
           />
-          <Route 
-            path="/exchanges" 
+          <Route
+            path="/exchanges"
             element={
               <ProtectedRoute>
                 <ExchangesPage />
               </ProtectedRoute>
-            } 
+            }
+          />
+          <Route
+            path="/exchanges/:id"
+            element={
+              <ProtectedRoute>
+                <ExchangeDetailPage />
+              </ProtectedRoute>
+            }
           />
           <Route 
             path="/withdrawals" 
@@ -55,13 +65,21 @@ export default function App() {
               </ProtectedRoute>
             } 
           />
-          <Route 
-            path="/history" 
+          <Route
+            path="/history"
             element={
               <ProtectedRoute>
                 <HistoryPage />
               </ProtectedRoute>
-            } 
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
           />
 
           {/* Admin Routes */}

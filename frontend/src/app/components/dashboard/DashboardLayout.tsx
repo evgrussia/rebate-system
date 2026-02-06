@@ -1,10 +1,10 @@
 import { Link, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/button';
-import { 
-  LayoutDashboard, 
-  Building2, 
-  Wallet, 
+import {
+  LayoutDashboard,
+  Building2,
+  Wallet,
   History,
   Users,
   DollarSign,
@@ -14,7 +14,8 @@ import {
   ChevronDown,
   Bell,
   Menu,
-  X
+  X,
+  MoreHorizontal
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -36,6 +37,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     { icon: Building2, label: 'Биржи', path: '/exchanges' },
     { icon: Wallet, label: 'Выплаты', path: '/withdrawals' },
     { icon: History, label: 'История', path: '/history' },
+    { icon: Settings, label: 'Настройки', path: '/settings' },
+  ];
+
+  const traderBottomNavItems = [
+    { icon: LayoutDashboard, label: 'Дашборд', path: '/dashboard' },
+    { icon: Building2, label: 'Биржи', path: '/exchanges' },
+    { icon: Wallet, label: 'Выплаты', path: '/withdrawals' },
+    { icon: MoreHorizontal, label: 'Ещё', path: '/history' },
   ];
 
   const adminNavItems = [
@@ -46,6 +55,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   ];
 
   const navItems = isAdmin ? adminNavItems : traderNavItems;
+  const bottomNavItems = isAdmin ? adminNavItems.slice(0, 4) : traderBottomNavItems;
 
   const handleLogout = () => {
     logout();
@@ -60,7 +70,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-emerald-50">
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={closeMobileMenu}
         />
@@ -96,7 +106,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path ||
+              (item.path === '/exchanges' && location.pathname.startsWith('/exchanges/'));
             return (
               <Link
                 key={item.path}
@@ -134,10 +145,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
             {showUserMenu && (
               <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-xl border border-gray-200 shadow-xl overflow-hidden">
-                <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
+                <Link
+                  to="/settings"
+                  onClick={() => { setShowUserMenu(false); closeMobileMenu(); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors"
+                >
                   <Settings className="w-4 h-4" />
                   <span className="text-sm">Настройки</span>
-                </button>
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-600 transition-colors border-t border-gray-100"
@@ -152,7 +167,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       </aside>
 
       {/* Main Content */}
-      <div className="lg:ml-64">
+      <div className="lg:ml-64 pb-16 lg:pb-0">
         {/* Top Bar */}
         <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-xl border-b border-gray-200/50">
           <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
@@ -167,14 +182,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
               <div className="min-w-0">
                 <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">
-                  {navItems.find(item => item.path === location.pathname)?.label || 'Панель управления'}
+                  {user?.name ? `Привет, ${user.name.split(' ')[0]}!` : (navItems.find(item => item.path === location.pathname)?.label || 'Панель управления')}
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">
-                  {new Date().toLocaleDateString('ru-RU', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                  {new Date().toLocaleDateString('ru-RU', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                   })}
                 </p>
               </div>
@@ -194,6 +209,28 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           {children}
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-white border-t border-gray-200 safe-area-bottom">
+        <div className="flex items-center justify-around h-16">
+          {bottomNavItems.map((item) => {
+            const isActive = location.pathname === item.path ||
+              (item.path === '/exchanges' && location.pathname.startsWith('/exchanges/'));
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-0 ${
+                  isActive ? 'text-blue-600' : 'text-gray-500'
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="text-[10px] font-medium truncate">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 };
